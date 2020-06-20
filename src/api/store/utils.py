@@ -16,7 +16,7 @@ def get_community(community_id=None, subdomain=None):
 
   return None, CustomMassenergizeError("Missing community_id or subdomain field")
 
-def get_user(user_id, email=None):
+def get_user(user_id, email):
   try:
     if email: 
       return UserProfile.objects.filter(email=email).first(), None
@@ -44,6 +44,7 @@ def get_community_or_die(context, args):
 def get_user_or_die(context, args):
   user_email = args.pop('user_email', None) or args.pop('email', None) or context.user_email
   user_id = args.pop('user_id', None) or context.user_id
+  user = None
   if user_id:
     return UserProfile.objects.get(pk=user_id)
   elif user_email:
@@ -64,14 +65,3 @@ def get_admin_communities(context: Context):
 def send_slack_message(webhook, body):
   r = requests.post(url = webhook, data = json.dumps(body)) 
   return r
-
-def remove_dups(lst):
-  final_lst = []
-  tracking_set = set()
-  
-  for u in lst:
-    if u not in tracking_set:
-      final_lst.append(u)
-      tracking_set.add(u)
-  
-  return final_lst

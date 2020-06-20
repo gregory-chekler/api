@@ -1,11 +1,9 @@
-from database.models import Graph, UserProfile, Media, Vendor, Action, Community, Data, Tag, TagCollection, UserActionRel,RealEstateUnit, Team, TeamMember
+from database.models import Graph, UserProfile, Media, Vendor, Action, Community, Data, Tag, TagCollection, UserActionRel,RealEstateUnit
 from _main_.utils.massenergize_errors import MassEnergizeAPIError, InvalidResourceError, ServerError, CustomMassenergizeError, NotAuthorizedError
 from _main_.utils.massenergize_response import MassenergizeResponse
 from _main_.utils.context import Context
-from django.db.models import Q, prefetch_related_objects
+from django.db.models import Q
 from .utils import get_community
-import time
-import timeit
 
 class GraphStore:
   def __init__(self):
@@ -57,7 +55,7 @@ class GraphStore:
 
       if context.is_prod and not context.user_is_admin():
         if not community.is_published:
-          return None, CustomMassenergizeError("Content Not Available Yet")
+          return None, CustomMassenergizeError("Content Available Yet")
 
       graph = Graph.objects.prefetch_related('data').select_related('community').filter(community=community, title="Number of Actions Completed by Category").first()
       if not graph:
@@ -87,96 +85,18 @@ class GraphStore:
       return None, CustomMassenergizeError(e)
 
 
-  def graph_actions_completed_by_team(self, context: Context, args) -> (Graph, MassEnergizeAPIError):
-    try:
-
-      team_id = args.get('team_id', None)
-
-      if not team_id:
-        return None, CustomMassenergizeError("Missing team_id field")
-
-      team: Team = Team.objects.get(id=team_id)
-
-      if not team:
-        return None, InvalidResourceError()
-
-      if context.is_prod and not context.user_is_admin():
-        if not team.is_published:
-          return None, CustomMassenergizeError("Content Not Available Yet")
-  
-      members = TeamMember.objects.filter(team=team)
-
-      completed_action_rels = []
-      for member in members:
-        completed_action_rels.extend(member.user.useractionrel_set.filter(status="DONE").all())
-
-      categories = TagCollection.objects.get(name="Category").tag_set.order_by("name").all()
-
-      prefetch_related_objects(completed_action_rels, "action__tags")
-      data = []
-      for category in categories:
-        data.append({
-          "id"   : category.id,
-          "name" : category.name,
-          "value": len(list(filter(lambda action_rel : category in action_rel.action.tags.all(), completed_action_rels)))
-        })
-
-      res = {
-        "data": data,
-        "title": "Actions Completed By Members Of Team",
-        "team": team.info()
-      }
-   
-      return res, None
-        
-    except Exception as e:
-      import traceback
-      traceback.print_exc()
-      return None, CustomMassenergizeError(e)
-
-
   def _get_households_engaged(self, community: Community):
-
     households_engaged = 0 if not community.goal else community.goal.attained_number_of_households
     households_engaged += (RealEstateUnit.objects.filter(community=community).count())
     actions_completed = 0 if not community.goal else community.goal.attained_number_of_actions
-
-    done_actions = UserActionRel.objects.filter(real_estate_unit__community=community.id, status="DONE")
-    actions_completed += done_actions.count()
-    carbon_footprint_reduction = 0 if not community.goal or not community.goal.attained_carbon_footprint_reduction else community.goal.attained_carbon_footprint_reduction
-
-    # this is where all the time was
-    #start = time.time()
-    #startcpu = timeit.timeit()
-
-    # loop over actions completed
-    #for actionRel in done_actions:
-    #  if actionRel.action and actionRel.action.calculator_action :
-    #    carbon_footprint_reduction += actionRel.action.calculator_action.average_points
-
-    #stop = time.time()
-    #stopcpu = timeit.timeit()
-    #msg = "_get_househods_engaged: Community %s time %.3f" % (community.name, stop-start)
-    #print(msg)
-
-
-    return {"community": {"id": community.id, "name": community.name}, 
-            "actions_completed": actions_completed, "households_engaged": households_engaged, 
-            "carbon_footprint_reduction": carbon_footprint_reduction}
+    actions_completed += UserActionRel.objects.filter(real_estate_unit__community=community.id, status="DONE").count()
+    return {"community": {"id": community.id, "name": community.name}, "actions_completed": actions_completed, "households_engaged": households_engaged}
 
 
   def _get_all_households_engaged(self):
     households_engaged = UserProfile.objects.filter(is_deleted=False).count()
-    done_actions = UserActionRel.objects.filter(status="DONE")
-    actions_completed = done_actions.count()
-    carbon_footprint_reduction = 0
-    for actionRel in done_actions:
-      if actionRel.action and actionRel.action.calculator_action :
-        carbon_footprint_reduction += actionRel.action.calculator_action.average_points 
-
-    return {"community": {"id": 0, "name": 'Other'}, 
-            "actions_completed": actions_completed, "households_engaged": households_engaged,
-            "carbon_footprint_reduction": carbon_footprint_reduction}
+    actions_completed = UserActionRel.objects.filter(status="DONE").count()
+    return {"community": {"id": 0, "name": 'Other'}, "actions_completed": actions_completed, "households_engaged": households_engaged}
 
 
   def graph_communities_impact(self, context: Context, args) -> (Graph, MassEnergizeAPIError):
@@ -262,6 +182,7 @@ class GraphStore:
           if data_id.isnumeric() and v.isnumeric():
             data = Data.objects.filter(pk=data_id).first()
             if data:
+              print(data)
               data.reported_value = v
               data.save()
       

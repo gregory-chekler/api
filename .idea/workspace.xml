@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="8c7f47ef-b494-4ab8-92f0-2e0e0605d0f6" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/src/carbon_calculator/tests/expected_outputs.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/carbon_calculator/tests/expected_outputs.txt" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1bmF9HSTovzJ1WHk3IWZCTtwJuy" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.django.DjangoModulesConfigurable" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="8c7f47ef-b494-4ab8-92f0-2e0e0605d0f6" name="Default Changelist" comment="" />
+      <created>1589229208487</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1589229208487</updated>
+      <workItem from="1589229214225" duration="1544000" />
+      <workItem from="1589308123302" duration="1214000" />
+      <workItem from="1589340282205" duration="1341000" />
+      <workItem from="1589492815529" duration="538000" />
+      <workItem from="1589565448976" duration="5747000" />
+      <workItem from="1589585420511" duration="111000" />
+      <workItem from="1589640891415" duration="225000" />
+      <workItem from="1589839392613" duration="541000" />
+      <workItem from="1589840458459" duration="2467000" />
+      <workItem from="1589843105239" duration="902000" />
+      <workItem from="1589983576125" duration="190000" />
+      <workItem from="1590179331333" duration="2078000" />
+      <workItem from="1592514024480" duration="374000" />
+      <workItem from="1592515207501" duration="724000" />
+      <workItem from="1592521793854" duration="238000" />
+      <workItem from="1592526230709" duration="99000" />
+      <workItem from="1592531675498" duration="90000" />
+      <workItem from="1592622322626" duration="466000" />
+      <workItem from="1592631259083" duration="12000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="192" y="0" key="SettingsEditor" timestamp="1592622546828">
+      <screen x="0" y="0" width="1366" height="768" />
+    </state>
+    <state x="192" y="0" key="SettingsEditor/0.0.1366.768@0.0.1366.768" timestamp="1592622546828" />
+  </component>
+</project>

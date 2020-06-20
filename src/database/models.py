@@ -7,7 +7,6 @@ from .utils.common import  json_loader,get_json_if_not_none, get_summary_info
 from django.forms.models import model_to_dict
 from carbon_calculator.models import Action as CCAction
 import uuid
-import time
 
 CHOICES = json_loader('./database/raw_data/other/databaseFieldChoices.json')
 ZIP_CODE_AND_STATES = json_loader('./database/raw_data/other/states.json')
@@ -34,7 +33,7 @@ class Location(models.Model):
   """
   id = models.AutoField(primary_key=True)
   location_type = models.CharField(max_length=TINY_STR_LEN, 
-    choices=CHOICES.get("LOCATION_TYPES", {}).items())
+    choices=CHOICES["LOCATION_TYPES"].items())
   street = models.CharField(max_length=SHORT_STR_LEN, blank=True)
   unit_number = models.CharField(max_length=SHORT_STR_LEN, blank=True)
   zipcode = models.CharField(max_length=SHORT_STR_LEN, blank=True)
@@ -196,6 +195,10 @@ class Goal(models.Model):
   more_info = JSONField(blank=True, null=True)
   is_deleted = models.BooleanField(default=False, blank=True)
 
+
+  def get_status(self):
+    return CHOICES["GOAL_STATUS"][self.status]
+
   def __str__(self):
     return f"{self.name} {' - Deleted' if self.is_deleted else ''}"
 
@@ -294,8 +297,6 @@ class Community(models.Model):
     # For Wayland launch, insisting that we show large numbers so people feel good about it.
     goal["attained_number_of_households"] += (RealEstateUnit.objects.filter(community=self).count())
     goal["attained_number_of_actions"] += (UserActionRel.objects.filter(real_estate_unit__community=self, status="DONE").count())
-    #BHN - TODO
-    #goal["attained_carbon_footprint_reduction"] += (UserActionRel.objects.filter(real_estate_unit__community=self, status="DONE").count())
 
     return {
       "id": self.id,
@@ -344,7 +345,7 @@ class RealEstateUnit(models.Model):
   name = models.CharField(max_length=SHORT_STR_LEN)
   unit_type =  models.CharField(
     max_length=TINY_STR_LEN, 
-    choices=CHOICES.get("REAL_ESTATE_TYPES", {}).items()
+    choices=CHOICES["REAL_ESTATE_TYPES"].items()
   )
   community = models.ForeignKey(Community, null=True, on_delete=models.SET_NULL, blank=True)
   location = JSONField(blank=True, null=True)
@@ -383,7 +384,7 @@ class Role(models.Model):
   """
   id = models.AutoField(primary_key=True)
   name = models.CharField(max_length=TINY_STR_LEN, 
-    choices=CHOICES.get("ROLE_TYPES", {}).items(), 
+    choices=CHOICES["ROLE_TYPES"].items(), 
     unique=True
   ) 
   description = models.TextField(max_length=LONG_STR_LEN, blank=True)
@@ -391,7 +392,7 @@ class Role(models.Model):
 
 
   def __str__(self):
-    return CHOICES.get("ROLE_TYPES", {})[self.name] 
+    return CHOICES["ROLE_TYPES"][self.name] 
 
   def simple_json(self):
     return model_to_dict(self)
@@ -491,7 +492,6 @@ class UserProfile(models.Model):
 
   class Meta:
     db_table = 'user_profiles' 
-    ordering = ('-created_at',)
 
 
 class CommunityMember(models.Model):
@@ -519,7 +519,6 @@ class CommunityMember(models.Model):
   class Meta:
     db_table = 'community_members_and_admins'
     unique_together = [['community', 'user']]
-    ordering = ('-created_at',)
 
 
 class Subdomain(models.Model):
@@ -894,22 +893,17 @@ class Vendor(models.Model):
     data['communities'] = [c.simple_json() for c in self.communities.all()]
     data['tags'] = [t.simple_json() for t in self.tags.all()]
     data['logo'] = get_json_if_not_none(self.logo)
-    data['website'] = self.more_info and self.more_info.get('website', None)
-    data['key_contact'] = self.key_contact
     return data
 
 
   def full_json(self):
-    data =  model_to_dict(self, exclude=['logo', 'banner', 'services', 'onboarding_contact'])
+    data =  model_to_dict(self, exclude=['logo', 'banner', 'services', 'onboarding_contact', 'more_info'])
     data['onboarding_contact'] = get_json_if_not_none(self.onboarding_contact)
     data['logo'] = get_json_if_not_none(self.logo)
-    data['more_info'] = self.more_info
     data['tags'] = [t.simple_json() for t in self.tags.all()]
     data['banner']  = get_json_if_not_none(self.banner)
     data['services'] = [s.simple_json() for s in self.services.all()]
     data['communities'] = [c.simple_json() for c in self.communities.all()]
-    data['website'] = self.more_info and self.more_info.get('website', None)
-    data['key_contact'] = self.key_contact
     return data
 
   class Meta:
@@ -1098,13 +1092,13 @@ class EventAttendee(models.Model):
   event =  models.ForeignKey(Event,on_delete=models.CASCADE)
   status = models.CharField(
     max_length=TINY_STR_LEN, 
-    choices=CHOICES.get("EVENT_CHOICES", {}).items()
+    choices=CHOICES["EVENT_CHOICES"].items()
   )
   is_deleted = models.BooleanField(default=False, blank=True)
 
   def __str__(self):
     return '%s | %s | %s' % (
-      self.attendee, CHOICES.get("EVENT_CHOICES", {})[self.status], self.event)
+      self.attendee, CHOICES["EVENT_CHOICES"][self.status], self.event)
   
   def simple_json(self):
     data =  model_to_dict(self, ['id', 'status'])
@@ -1138,7 +1132,7 @@ class Permission(models.Model):
   id = models.AutoField(primary_key=True)
   name = models.CharField(
     max_length=TINY_STR_LEN, 
-    choices=CHOICES.get("PERMISSION_TYPES", {}).items(), 
+    choices=CHOICES["PERMISSION_TYPES"].items(), 
     db_index=True
   )
   description = models.TextField(max_length=LONG_STR_LEN, blank=True)
@@ -1147,7 +1141,7 @@ class Permission(models.Model):
 
 
   def __str__(self):
-    return CHOICES.get("PERMISSION_TYPES", {})[self.name] 
+    return CHOICES["PERMISSION_TYPES"][self.name] 
 
   def simple_json(self):
     return model_to_dict(self)
@@ -1236,31 +1230,13 @@ class Testimonial(models.Model):
   def info(self):
     return model_to_dict(self, include=['id', 'title', 'community'])
 
-  def _get_user_info(self):
-    return get_json_if_not_none(self.user) or {
-      "full_name": "User unknown",
-      "email": "e-mail address not provided"
-    }
-    # Cadmins need to see e-mails
-    #if(self.anonymous):
-    #  return {
-    #    "full_name": "Anonymous",
-    #    "email": "anonymous"
-    #  }
-    #elif(self.preferred_name):
-    #  return {
-    #    "full_name": self.preferred_name,
-    #    "email": "anonymous"
-    #  }
-    #else:
-    #  return get_json_if_not_none(self.user) or {
-    #    "full_name": "Anonymous",
-    #    "email": "anonymous"
-    #  }
-
   def simple_json(self):
+    anonymous = {
+      "full_name": "Anonymous",
+      "email": "anonymous"
+    }
     res = model_to_dict(self, exclude=['image', 'tags'])
-    res["user"] = self._get_user_info()
+    res["user"] = get_json_if_not_none(self.user) or  anonymous
     res["action"] = get_json_if_not_none(self.action)
     res["vendor"] = None if not self.vendor else self.vendor.info()
     res["community"] = get_json_if_not_none(self.community)
@@ -1312,7 +1288,7 @@ class UserActionRel(models.Model):
   vendor = models.ForeignKey(Vendor, on_delete=models.SET_NULL, 
     null=True, blank=True)
   status  = models.CharField(max_length=SHORT_STR_LEN, 
-    choices = CHOICES.get("USER_ACTION_STATUS", {}).items(), 
+    choices = CHOICES["USER_ACTION_STATUS"].items(), 
     db_index=True, default='TODO')
   created_at = models.DateTimeField(auto_now_add=True)
   updated_at = models.DateTimeField(auto_now=True)
@@ -1479,7 +1455,7 @@ class Graph(models.Model):
   id = models.AutoField(primary_key=True)
   title = models.CharField(max_length = LONG_STR_LEN, db_index=True)
   graph_type = models.CharField(max_length=TINY_STR_LEN, 
-    choices=CHOICES.get("GRAPH_TYPES", {}).items())
+    choices=CHOICES["GRAPH_TYPES"].items())
   community = models.ForeignKey(Community, on_delete=models.SET_NULL, null=True,blank=True)
   data = models.ManyToManyField(Data,  blank=True)
   is_deleted = models.BooleanField(default=False, blank=True)
@@ -1945,18 +1921,7 @@ class HomePageSettings(models.Model):
     # 
     # For Wayland launch, insisting that we show large numbers so people feel good about it.
     goal["organic_attained_number_of_households"] = (RealEstateUnit.objects.filter(community=self.community).count())
-    done_actions = UserActionRel.objects.filter(real_estate_unit__community=self.community,status="DONE")
-    goal["organic_attained_number_of_actions"] = (done_actions.count())
-    carbon_footprint_reduction = 0
-# commenting out temporarily until database access speeded up
-#    start = time.time()
-#    for actionRel in done_actions:
-#      if actionRel.action and actionRel.action.calculator_action:
-#        carbon_footprint_reduction += actionRel.action.calculator_action.average_points
-#    stop = time.time()
-#    msg = "carbon footprint reduction time : %.3f" % (stop-start)
-#    print(msg)
-    goal["organic_attained_carbon_footprint_reduction"] = carbon_footprint_reduction
+    goal["organic_attained_number_of_actions"] = (UserActionRel.objects.filter(real_estate_unit__community=self.community,status="DONE").count())
 
     res =  self.simple_json()
     res['images'] = [i.simple_json() for i in self.images.all()]
@@ -2169,7 +2134,6 @@ class Message(models.Model):
     res = model_to_dict(self)
     res["community"] = get_summary_info(self.community)
     res["team"] = get_summary_info(self.team)
-    res["user"] = get_summary_info(self.user)
     return res
 
   def full_json(self):

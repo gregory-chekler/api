@@ -15,8 +15,3 @@ deploy-dev:
 	python prepare-for-deploy.py --dev
 	eb deploy
 .PHONY: deploy-dev
-
-deploy:
-	docker-compose build
-	docker-compose push
-.PHONY: deploy

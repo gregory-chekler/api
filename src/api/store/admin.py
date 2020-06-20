@@ -56,6 +56,7 @@ class AdminStore:
       
       user.is_super_admin = False
       user.save()
+      print(user)
       return user, None
 
     except Exception as e:
@@ -266,6 +267,7 @@ class AdminStore:
       subdomain = args.pop('subdomain', None)
       community, err = get_community(community_id, subdomain)
       if err:
+        print(err)
         return None, err
 
       if not community and context.user_id:
