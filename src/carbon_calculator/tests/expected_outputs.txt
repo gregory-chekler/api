@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-{'Timestamp': '2020-06-18 21:59:05.293805+00:00',
-=======
-{'Timestamp': '2020-05-18 23:00:35.714647+00:00',
->>>>>>> greg-test-1
+{'Timestamp': '2020-06-20 19:29:18.835142+00:00',
  'coldwater_wash': {'carbon_points': 769.0,
                     'cost': 0,
                     'explanation': 'Washing with cold water would save a good '
