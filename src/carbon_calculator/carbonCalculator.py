@@ -35,7 +35,7 @@ def SavePic2Media(picURL):
     loc2 = picURL.find(')')
     if loc1>0 and loc2>0:
         picURL = picURL[loc1+1:loc2]
-    #print("Importing picture from: "+picURL)
+    print("Importing picture from: "+picURL)
     try:
         resp = requests.get(picURL)
         if resp.status_code != requests.codes.ok:
@@ -198,13 +198,25 @@ class CarbonCalculator:
     def Import(self,inputs):
         if inputs.get('Confirm',NO) == YES:
             status = False
+            actionsFile = inputs.get('Actions','')
+            if actionsFile!='':
+                with open(actionsFile, newline='') as csvfile:
+                    inputlist = csv.reader(csvfile)
+                    first = True
+                    for item in inputlist:
+                        if first:
+                            #header = item
+                            first = False
+                        else:
+                            name = item[0]
+                            if name == '':
+                                continue
 
             questionsFile = inputs.get('Questions','')
             if questionsFile!='':
                 with open(questionsFile, newline='') as csvfile:
                     inputlist = csv.reader(csvfile)
                     first = True
-                    num = 0
                     for item in inputlist:
                         if first:
                             #header = item
@@ -237,9 +249,6 @@ class CarbonCalculator:
                                 response_6=item[14], skip_6=skip[5])
                             #print('Importing Question ',question.name,': ',question.question_text)
                             question.save()
-                            num+=1
-                    msg = "Imported %d Carbon Calculator Questions" % num
-                    print(msg)
                     csvfile.close()
                     status = True
 
@@ -291,7 +300,6 @@ class CarbonCalculator:
                 with open(stationsFile, newline='') as csvfile:
                     inputlist = csv.reader(csvfile)
                     first = True
-                    num = 0
                     for item in inputlist:
                         if first:
                             #header = item
@@ -314,9 +322,6 @@ class CarbonCalculator:
 
                             #print('Importing Station ',station.name,': ',station.description)
                             station.save()
-                            num+=1
-                    msg = "Imported %d CarbonSaver Stations" % num
-                    print(msg)
                     csvfile.close()
                     status = True
 
@@ -325,7 +330,6 @@ class CarbonCalculator:
                 with open(eventsFile, newline='') as csvfile:
                     inputlist = csv.reader(csvfile)
                     first = True
-                    num = 0
                     for item in inputlist:
                         if first:
                             #header = item
@@ -377,11 +381,8 @@ class CarbonCalculator:
                                     if g:
                                         gg = g[0]
                                         event.groups.add(gg)
-                            #print('Importing Event ',event.name,' at ',event.location,' on ',event.datetime)
+                            print('Importing Event ',event.name,' at ',event.location,' on ',event.datetime)
                             event.save()
-                            num+=1
-                    msg = "Imported %d CarbonSaver Events" % num
-                    print(msg)
                     csvfile.close()
                     status = True
             groupsFile = inputs.get('Groups','')
@@ -389,7 +390,6 @@ class CarbonCalculator:
                 with open(groupsFile, newline='') as csvfile:
                     inputlist = csv.reader(csvfile)
                     first = True
-                    num = 0
                     for item in inputlist:
                         if first:
                             #header = item
@@ -414,9 +414,6 @@ class CarbonCalculator:
 
                             #print('Importing Group ',group.displayname)
                             group.save()
-                            num+=1
-                    msg = "Imported %d CarbonSaver Groups" % num
-                    print(msg)
                     csvfile.close()
                     status = True
             defaultsFile = inputs.get('Defaults','')
